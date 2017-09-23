@@ -3,7 +3,11 @@ class Board
 
   def initialize
     @layout = Array.new(8) { Array.new(8, nil) }
-    8.times { |i| @layout[1][i] = WhitePawn.new }
+    8.times { |i| @layout[i][1] = WhitePawn.new }
+  end
+
+  def get_cell(x,y)
+    return @layout[x][y]
   end
 end
 
@@ -22,14 +26,19 @@ class GameRender
     hline = "  +--+--+--+--+--+--+--+--+\n"
     render_string = hline + "   A  B  C  D  E  F  G  H\n"
 
-    board.layout.each_with_index do |row, i|
-      row_string = "#{i+1} |"
-      row.each do |cell|
+    8.times do |y|
+      row_string = "#{y+1} |"
+
+      8.times do |x|
+        cell = board.layout[x][y]
+
         row_string << (cell != nil ? "#{cell.symbol} |" : "  |")
       end
-      row_string << " #{i+1}"
+
+      row_string << " #{y+1}"
       render_string = hline + (row_string + "\n") + render_string
     end
+
     render_string = "   A  B  C  D  E  F  G  H\n" + render_string
     print render_string
   end
@@ -37,3 +46,5 @@ end
 
 b = Board.new
 GameRender.render_board(b)
+p b.get_cell(1,1)
+p b.get_cell(1,3)
