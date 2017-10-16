@@ -4,39 +4,57 @@ class Board
   def initialize
     @dim = 8
     @layout = Hash.new {}
-    @dim.times { |i| @layout[[i,1]] = WhitePawn }
-    @layout[[0,0]] = WhiteRook
-    @layout[[7,0]] = WhiteRook
+    @dim.times { |i| create_piece([i,1], WhitePawn) }
+    create_piece([0,0], WhiteRook)
+    create_piece([7,0], WhiteRook)
+    create_piece([4,5], DummyPiece)
   end
 
+  def create_piece(coord, piece)
+    @layout[coord] = piece.new(self)
+  end
+  
   def get_cell(pos_ary)
-    x = pos_ary[0]
-    y = pos_ary[1]
-    return @layout[[x,y]]
+    @layout[pos_ary]
   end
 end
 
 class Piece
-  @symbol = "?"
-  @color = :none
+  attr_reader :symbol
 
-  def self.symbol
-    @symbol
+  def initialize(board)
+    @symbol = "?"
+    @color = :none
+    @board = board
   end
 
-  def self.color
-    @color
+  def pos
+    @board.layout.key(self)
+  end
+end
+
+class DummyPiece < Piece
+  def initialize(board)
+    super
+    @symbol = "X"
+    @color = :white
   end
 end
 
 class WhitePawn < Piece
-  @symbol = "\u265F"
-  @color = :white
+  def initialize(board)
+    super
+    @symbol = "\u265F"
+    @color = :white
+  end
 end
 
 class WhiteRook < Piece
-  @symbol = "\u265C"
-  @color = :white
+  def initialize(board)
+    super
+    @symbol = "\u265C"
+    @color = :white
+  end
 end
 
 class GameRender
