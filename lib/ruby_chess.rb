@@ -31,6 +31,11 @@ class Piece
   def pos
     @board.layout.key(self)
   end
+
+  def move(to)
+    @board.layout.delete(pos)
+    @board.layout[to] = self
+  end
 end
 
 class DummyPiece < Piece
@@ -81,5 +86,54 @@ class GameRender
   end
 end
 
-b = Board.new
-GameRender.render_board(b)
+class Game
+  def initialize
+    @board = Board.new
+    start
+  end
+
+  def start
+    GameRender.render_board(@board)
+    @board.layout[[4,5]].move([5,6])
+    loop do
+      GameRender.render_board(@board)
+      move_piece
+    end
+  end
+
+  def move_piece
+    input = get_input
+    from = []
+    to = []
+
+    from[0] = ("a".."h").to_a.index(input[0])
+    from[1] = input[1].to_i - 1
+
+    to[0] = ("a".."h").to_a.index(input[2])
+    to[1] = input[3].to_i - 1
+
+    if @board.layout[from]
+      @board.layout[from].move(to)
+    end
+  end
+
+  def get_input
+    input = ""
+    loop do
+      puts "give me input"
+      input = gets.chomp.downcase
+      break if valid_input?(input)
+    end
+    return input
+  end
+
+  def valid_input?(input)
+    return false if input.length != 4
+    return false unless ('a'..'h').include?(input[0]) && ('a'..'h').include?(input[2])
+    return false unless (1..8).include?(input[1].to_i) && (1..8).include?(input[1].to_i)
+    return true
+  end
+
+end
+
+Game.new
