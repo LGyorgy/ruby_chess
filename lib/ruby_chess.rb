@@ -1,9 +1,18 @@
 class Board
-  attr_reader :layout
+  attr_reader :layout, :valid_coords
 
   def initialize
     @dim = 8
+    @valid_coords = []
+
+    8.times do |i|
+      8.times do |j|
+        @valid_coords << [i,j]
+      end
+    end
+
     @layout = Hash.new {}
+
     @dim.times { |i| create_piece([i,1], WhitePawn) }
     create_piece([0,0], WhiteRook)
     create_piece([7,0], WhiteRook)
@@ -20,11 +29,11 @@ class Board
 end
 
 class Piece
-  attr_reader :symbol
+  attr_reader :symbol, :color
 
   def initialize(board)
     @symbol = "?"
-    @color = :none
+    @color = :white
     @board = board
   end
 
@@ -33,16 +42,41 @@ class Piece
   end
 
   def move(to)
+    if valid_moves.include?(to)
+      move_piece(to)
+      return true
+    end
+    return false
+  end
+
+  def valid_moves
+    valid_moves_ary = []
+    @board.valid_coords.each do |at_pos|
+      valid_moves_ary << at_pos if check_collision(at_pos) < 1
+    end
+    return valid_moves_ary
+  end
+
+  def move_piece(to)
     @board.layout.delete(pos)
     @board.layout[to] = self
+  end
+
+  def check_collision(at_pos)
+    cell = @board.layout[at_pos]
+    if cell
+      return -1 if cell.color != @color
+      return 1 if cell.color == @color
+    end
+    return 0
   end
 end
 
 class DummyPiece < Piece
   def initialize(board)
     super
-    @symbol = "X"
-    @color = :white
+    @symbol = "O"
+    @color = :black
   end
 end
 
@@ -51,6 +85,38 @@ class WhitePawn < Piece
     super
     @symbol = "\u265F"
     @color = :white
+    @first_move = true
+  end
+
+  def move_piece(to)
+    @first_move = false
+    super
+  end
+
+  def valid_moves
+    cur_pos = pos
+    valid_pos =[]
+    
+    pos_to_check = [cur_pos[0], cur_pos[1]+1]
+    if check_collision(pos_to_check) == 0
+      valid_pos << pos_to_check
+    end
+
+     pos_to_check = [cur_pos[0], cur_pos[1]+2]
+    if check_collision(pos_to_check) == 0 && @first_move
+      valid_pos << pos_to_check
+    end
+    
+     pos_to_check = [cur_pos[0]-1, cur_pos[1]+1]
+    if check_collision(pos_to_check) == -1
+      valid_pos << pos_to_check
+    end
+
+     pos_to_check = [cur_pos[0]+1, cur_pos[1]+1]
+    if check_collision(pos_to_check) == -1
+      valid_pos << pos_to_check
+    end
+    return valid_pos
   end
 end
 
@@ -93,8 +159,6 @@ class Game
   end
 
   def start
-    GameRender.render_board(@board)
-    @board.layout[[4,5]].move([5,6])
     loop do
       GameRender.render_board(@board)
       move_piece
