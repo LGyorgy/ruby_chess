@@ -32,7 +32,12 @@ class Board
     create_piece(Knight, :white, [6,0])
     create_piece(Knight, :black, [1,7])
     create_piece(Knight, :black, [6,7])
+    
+    create_piece(King, :white, [4,0])
+    create_piece(King, :black, [4,7])
 
+    create_piece(Queen, :white, [3,0])
+    create_piece(Queen, :black, [3,7])
   end
 
   def create_piece(piece, color, coord)
@@ -48,10 +53,21 @@ class Piece
   attr_reader :symbol, :color
 
   def initialize(board, color)
-    @symbol = "?"
+    @symbol_pool = ["X", "O"]
     @color = color
+    choose_symbol    
     @board = board
     @first_move = true
+  end
+
+  def choose_symbol
+    if @color == :white
+      @symbol = @symbol_pool[0]
+    elsif @color == :black
+      @symbol = @symbol_pool[1]
+    else
+      @symbol = "?"
+    end
   end
 
   def pos
@@ -120,19 +136,11 @@ class Piece
   end
 end
 
-class DummyPiece < Piece
-  def initialize(board, color)
-    super
-    @symbol = "O"
-    @color = :black
-  end
-end
-
 class Pawn < Piece
   def initialize(board, color)
     super
-    @symbol = "\u265F" if color == :white
-    @symbol = "\u2659" if color == :black
+    @symbol_pool = ["\u265F", "\u2659"]
+    choose_symbol
   end
 
   def move_piece(to)
@@ -176,8 +184,8 @@ end
 class Rook < Piece
   def initialize(board, color)
     super
-    @symbol = "\u265C" if color == :white
-    @symbol = "\u2656" if color == :black
+    @symbol_pool = ["\u265C", "\u2656"]
+    choose_symbol
   end
 
   def valid_moves
@@ -191,8 +199,8 @@ end
 class Bishop < Piece
   def initialize(board, color)
     super
-    @symbol = "\u265D" if color == :white
-    @symbol = "\u2657" if color == :black
+    @symbol_pool = ["\u265D", "\u2657"]
+    choose_symbol
   end
 
   def valid_moves
@@ -205,12 +213,40 @@ end
 class Knight < Piece
   def initialize(board, color)
     super
-    @symbol = "\u265E" if color == :white
-    @symbol = "\u2658" if color == :black
+    @symbol_pool = ["\u265E", "\u2658"]
+    choose_symbol
   end
 
   def valid_moves
     offset_ary = [[2,1],[-2,1],[2,-1],[-2,-1],[1,2],[-1,2],[1,-2],[-1,-2]]
+
+    return single_movement(offset_ary)
+  end
+end
+
+class Queen < Piece
+  def initialize(board, color)
+    super
+    @symbol_pool = ["\u265B", "\u2655"]
+    choose_symbol
+  end
+
+  def valid_moves
+    offset_ary = [[1,0],[0,1],[-1,0],[0,-1],[1,1],[-1,1],[-1,-1],[1,-1]]
+    
+    return linear_movement(offset_ary)
+  end
+end
+
+class King < Piece
+  def initialize(board, color)
+    super
+    @symbol_pool = ["\u265A", "\u2654"]
+    choose_symbol
+  end
+
+  def valid_moves
+    offset_ary = [[1,0],[0,1],[-1,0],[0,-1],[1,1],[-1,1],[-1,-1],[1,-1]]
 
     return single_movement(offset_ary)
   end
