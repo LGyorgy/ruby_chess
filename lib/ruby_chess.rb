@@ -13,14 +13,30 @@ class Board
 
     @layout = Hash.new {}
 
-    @dim.times { |i| create_piece([i,1], WhitePawn) }
-    create_piece([0,0], WhiteRook)
-    create_piece([7,0], WhiteRook)
-    create_piece([4,5], DummyPiece)
+    @dim.times do |i|
+      create_piece(Pawn, :white, [i,1])
+      create_piece(Pawn, :black, [i,6])
+    end
+
+    create_piece(Rook, :white, [0,0])
+    create_piece(Rook, :white, [7,0])
+    create_piece(Rook, :black, [0,7])
+    create_piece(Rook, :black, [7,7])
+    
+    create_piece(Bishop, :white, [2,0])
+    create_piece(Bishop, :white, [5,0])
+    create_piece(Bishop, :black, [2,7])
+    create_piece(Bishop, :black, [5,7])
+
+    create_piece(Knight, :white, [1,0])
+    create_piece(Knight, :white, [6,0])
+    create_piece(Knight, :black, [1,7])
+    create_piece(Knight, :black, [6,7])
+
   end
 
-  def create_piece(coord, piece)
-    @layout[coord] = piece.new(self)
+  def create_piece(piece, color, coord)
+    @layout[coord] = piece.new(self, color)
   end
   
   def get_cell(pos_ary)
@@ -31,10 +47,11 @@ end
 class Piece
   attr_reader :symbol, :color
 
-  def initialize(board)
+  def initialize(board, color)
     @symbol = "?"
-    @color = :white
+    @color = color
     @board = board
+    @first_move = true
   end
 
   def pos
@@ -45,6 +62,7 @@ class Piece
     if valid_moves.include?(to)
       move_piece(to)
       return true
+      @first_move = false
     end
     return false
   end
@@ -54,6 +72,36 @@ class Piece
     @board.valid_coords.each do |at_pos|
       valid_moves_ary << at_pos if check_collision(at_pos) < 1
     end
+    return valid_moves_ary
+  end
+  
+  def linear_movement(offset_ary)
+    cur_pos = pos
+    valid_moves_ary = []
+
+    offset_ary.each do |offset|
+      pos_to_check = [cur_pos[0] + offset[0], cur_pos[1] + offset[1]]
+      loop do
+        break if !@board.valid_coords.include?(pos_to_check) 
+        collision = check_collision(pos_to_check)
+        valid_moves_ary << pos_to_check if collision < 1
+        break if collision != 0
+        pos_to_check = [pos_to_check[0] + offset[0], pos_to_check[1] + offset[1]]
+      end
+    end
+
+    return valid_moves_ary
+  end
+
+  def single_movement(offset_ary)
+    cur_pos = pos
+    valid_moves_ary = []
+
+    offset_ary.each do |offset|
+      pos_to_check = [cur_pos[0] + offset[0], cur_pos[1] + offset[1]]
+      valid_moves_ary << pos_to_check if @board.valid_coords.include?(pos_to_check) && check_collision(pos_to_check) < 1
+    end
+
     return valid_moves_ary
   end
 
@@ -73,19 +121,18 @@ class Piece
 end
 
 class DummyPiece < Piece
-  def initialize(board)
+  def initialize(board, color)
     super
     @symbol = "O"
     @color = :black
   end
 end
 
-class WhitePawn < Piece
-  def initialize(board)
+class Pawn < Piece
+  def initialize(board, color)
     super
-    @symbol = "\u265F"
-    @color = :white
-    @first_move = true
+    @symbol = "\u265F" if color == :white
+    @symbol = "\u2659" if color == :black
   end
 
   def move_piece(to)
@@ -97,22 +144,28 @@ class WhitePawn < Piece
     cur_pos = pos
     valid_pos =[]
     
-    pos_to_check = [cur_pos[0], cur_pos[1]+1]
+    if @color == :black
+      black_modifier = -1
+    else
+      black_modifier = 1
+    end
+
+    pos_to_check = [cur_pos[0], cur_pos[1]+(1*black_modifier)]
     if check_collision(pos_to_check) == 0
       valid_pos << pos_to_check
     end
 
-     pos_to_check = [cur_pos[0], cur_pos[1]+2]
+     pos_to_check = [cur_pos[0], cur_pos[1]+(2*black_modifier)]
     if check_collision(pos_to_check) == 0 && @first_move
       valid_pos << pos_to_check
     end
     
-     pos_to_check = [cur_pos[0]-1, cur_pos[1]+1]
+     pos_to_check = [cur_pos[0]-1, cur_pos[1]+(1*black_modifier)]
     if check_collision(pos_to_check) == -1
       valid_pos << pos_to_check
     end
 
-     pos_to_check = [cur_pos[0]+1, cur_pos[1]+1]
+     pos_to_check = [cur_pos[0]+1, cur_pos[1]+(1*black_modifier)]
     if check_collision(pos_to_check) == -1
       valid_pos << pos_to_check
     end
@@ -120,11 +173,46 @@ class WhitePawn < Piece
   end
 end
 
-class WhiteRook < Piece
-  def initialize(board)
+class Rook < Piece
+  def initialize(board, color)
     super
-    @symbol = "\u265C"
-    @color = :white
+    @symbol = "\u265C" if color == :white
+    @symbol = "\u2656" if color == :black
+  end
+
+  def valid_moves
+    cur_pos = pos
+    offset_ary = [[1,0],[0,1],[-1,0],[0,-1]]
+    
+    return linear_movement(offset_ary)
+  end
+end
+
+class Bishop < Piece
+  def initialize(board, color)
+    super
+    @symbol = "\u265D" if color == :white
+    @symbol = "\u2657" if color == :black
+  end
+
+  def valid_moves
+    offset_ary = [[1,1],[-1,1],[-1,-1],[1,-1]]
+    
+    return linear_movement(offset_ary)
+  end
+end
+
+class Knight < Piece
+  def initialize(board, color)
+    super
+    @symbol = "\u265E" if color == :white
+    @symbol = "\u2658" if color == :black
+  end
+
+  def valid_moves
+    offset_ary = [[2,1],[-2,1],[2,-1],[-2,-1],[1,2],[-1,2],[1,-2],[-1,-2]]
+
+    return single_movement(offset_ary)
   end
 end
 
