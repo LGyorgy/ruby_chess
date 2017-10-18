@@ -10,6 +10,7 @@ Current verion: v0.03
 
 ### Update history
 
+v0.08 - implement en passant
 v0.08 - add movements for king, queen
 v0.07 - add movements for rook, bishop, knight
 v0.06 - add simple white pawn movement

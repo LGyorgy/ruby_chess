@@ -1,5 +1,6 @@
 class Board
   attr_reader :layout, :valid_coords
+  attr_accessor :enpassant_target, :captured_pieces
 
   def initialize
     @dim = 8
@@ -12,6 +13,9 @@ class Board
     end
 
     @layout = Hash.new {}
+    @enpassant_target = Hash.new
+    @captured_pieces = {white: [],
+                        black: []}
 
     @dim.times do |i|
       create_piece(Pawn, :white, [i,1])
@@ -43,7 +47,15 @@ class Board
   def create_piece(piece, color, coord)
     @layout[coord] = piece.new(self, color)
   end
-  
+
+  def reset_enpassant(color_to_reset)
+    @enpassant_target[color_to_reset] = []
+  end
+
+  def remove_piece(piece)
+    @layout.delete(@layout.key(piece))
+  end
+
   def get_cell(pos_ary)
     @layout[pos_ary]
   end
@@ -70,17 +82,33 @@ class Piece
     end
   end
 
+  def enemy
+    @color == :white ? :black : :white
+  end
+
   def pos
     @board.layout.key(self)
   end
 
   def move(to)
     if valid_moves.include?(to)
+      if check_collision(to) == -1
+        capture(to)
+      end
       move_piece(to)
-      return true
       @first_move = false
+      return true
     end
     return false
+  end
+
+  def capture(target)
+    @board.layout[target].get_captured
+  end
+
+  def get_captured
+    @board.captured_pieces[@color] << self
+    @board.remove_piece(self)
   end
 
   def valid_moves
@@ -142,10 +170,18 @@ class Pawn < Piece
     @symbol_pool = ["\u265F", "\u2659"]
     choose_symbol
   end
-
-  def move_piece(to)
-    @first_move = false
+  
+  def move(to)
+    return true if enpassant(to)
     super
+  end
+
+  def enpassant(target)
+    enpassant_target = @board.enpassant_target[enemy]
+    if enpassant_target && enpassant_target[0] == target
+      enpassant_target[1].get_captured
+      move_piece(target)
+    end 
   end
 
   def valid_moves
@@ -166,15 +202,16 @@ class Pawn < Piece
      pos_to_check = [cur_pos[0], cur_pos[1]+(2*black_modifier)]
     if check_collision(pos_to_check) == 0 && @first_move
       valid_pos << pos_to_check
+      @board.enpassant_target[@color] = [[cur_pos[0], cur_pos[1]+(1*black_modifier)], self]
     end
     
      pos_to_check = [cur_pos[0]-1, cur_pos[1]+(1*black_modifier)]
-    if check_collision(pos_to_check) == -1
+    if check_collision(pos_to_check) == -1 || @board.enpassant_target[enemy] == pos_to_check
       valid_pos << pos_to_check
     end
 
      pos_to_check = [cur_pos[0]+1, cur_pos[1]+(1*black_modifier)]
-    if check_collision(pos_to_check) == -1
+    if check_collision(pos_to_check) == -1 || @board.enpassant_target[enemy] == pos_to_check
       valid_pos << pos_to_check
     end
     return valid_pos
@@ -257,6 +294,8 @@ class GameRender
   def self.render_board(board)
     hline = "  +--+--+--+--+--+--+--+--+\n"
     render_string = hline + "   A  B  C  D  E  F  G  H\n"
+    
+    system("clear")
 
     8.times do |y|
       row_string = "#{y+1} |"
@@ -279,17 +318,34 @@ end
 class Game
   def initialize
     @board = Board.new
+    @player_to_go = :white
+    @turns = 1
+
     start
   end
 
   def start
     loop do
       GameRender.render_board(@board)
-      move_piece
+      take_turn
     end
   end
 
-  def move_piece
+  def take_turn
+    loop do
+      GameRender.render_board(@board)
+      break if move_piece(@player_to_go)
+    end
+    next_turn
+  end
+
+  def next_turn
+    @turns += 1
+    @player_to_go == :white ? @player_to_go = :black : @player_to_go = :white
+    @board.reset_enpassant(@player_to_go)
+  end
+
+  def move_piece(player)
     input = get_input
     from = []
     to = []
@@ -300,15 +356,17 @@ class Game
     to[0] = ("a".."h").to_a.index(input[2])
     to[1] = input[3].to_i - 1
 
-    if @board.layout[from]
-      @board.layout[from].move(to)
+    subject = @board.layout[from]
+    if subject && subject.color == player
+      return true if @board.layout[from].move(to)
     end
+    return false
   end
 
   def get_input
     input = ""
     loop do
-      puts "give me input"
+      puts "#{@player_to_go} give me input"
       input = gets.chomp.downcase
       break if valid_input?(input)
     end
