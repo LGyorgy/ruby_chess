@@ -26,7 +26,7 @@ class Board
     create_piece(Rook, :white, [7,0])
     create_piece(Rook, :black, [0,7])
     create_piece(Rook, :black, [7,7])
-    
+=begin
     create_piece(Bishop, :white, [2,0])
     create_piece(Bishop, :white, [5,0])
     create_piece(Bishop, :black, [2,7])
@@ -36,12 +36,12 @@ class Board
     create_piece(Knight, :white, [6,0])
     create_piece(Knight, :black, [1,7])
     create_piece(Knight, :black, [6,7])
-    
+=end
     create_piece(King, :white, [4,0])
     create_piece(King, :black, [4,7])
 
-    create_piece(Queen, :white, [3,0])
-    create_piece(Queen, :black, [3,7])
+    #create_piece(Queen, :white, [3,0])
+    create_piece(Queen, :black, [2,4])
   end
 
   def create_piece(piece, color, coord)
@@ -56,13 +56,52 @@ class Board
     @layout.delete(@layout.key(piece))
   end
 
+  def under_attack_by(color)
+    under_attack_ary = []
+    @layout.each_value do |piece|
+      if piece.color == color
+        under_attack_ary += piece.can_attack
+      end
+    end
+    return under_attack_ary.uniq
+  end
+
+  def check_by?(color)
+    possible_checks = under_attack_by(color)
+    possible_checks.each do |square|
+      piece = @layout[square]
+      if piece && piece.is_a?(King) && piece.color != color
+        return true
+      end
+    end
+    return false
+  end
+
+  def under_attack_alg_by(color)
+    can_attack_ary = under_attack_by(color)
+    string_ary = []
+
+    can_attack_ary.each do |coords|
+      coords_string = ""
+      letter = ("A".."H").to_a[coords[0]]
+      coords_string = letter + (coords[1]+1).to_s
+      string_ary << coords_string
+    end
+    return string_ary.sort
+  end
+
+  def square_empty?(coords)
+    return true unless @layout[coords]
+    return false
+  end
+
   def get_cell(pos_ary)
     @layout[pos_ary]
   end
 end
 
 class Piece
-  attr_reader :symbol, :color
+  attr_reader :symbol, :color, :first_move
 
   def initialize(board, color)
     @symbol_pool = ["X", "O"]
@@ -117,6 +156,10 @@ class Piece
       valid_moves_ary << at_pos if check_collision(at_pos) < 1
     end
     return valid_moves_ary
+  end
+
+  def can_attack
+    return valid_moves
   end
   
   def linear_movement(offset_ary)
@@ -184,15 +227,17 @@ class Pawn < Piece
     end 
   end
 
+  def black_modifier
+    if @color == :black
+      return -1
+    else
+      return 1
+    end
+  end
+
   def valid_moves
     cur_pos = pos
     valid_pos =[]
-    
-    if @color == :black
-      black_modifier = -1
-    else
-      black_modifier = 1
-    end
 
     pos_to_check = [cur_pos[0], cur_pos[1]+(1*black_modifier)]
     if check_collision(pos_to_check) == 0
@@ -215,6 +260,16 @@ class Pawn < Piece
       valid_pos << pos_to_check
     end
     return valid_pos
+  end
+
+  def can_attack
+    cur_pos = pos
+    can_attack_ary = []
+    pos_to_check = [cur_pos[0]+1, cur_pos[1]+(1*black_modifier)]
+      can_attack_ary << pos_to_check if @board.valid_coords.include?(pos_to_check)
+    pos_to_check = [cur_pos[0]-1, cur_pos[1]+(1*black_modifier)]
+      can_attack_ary << pos_to_check if @board.valid_coords.include?(pos_to_check)
+    return can_attack_ary
   end
 end
 
@@ -283,9 +338,79 @@ class King < Piece
   end
 
   def valid_moves
+    valid_moves_ary = []
     offset_ary = [[1,0],[0,1],[-1,0],[0,-1],[1,1],[-1,1],[-1,-1],[1,-1]]
 
-    return single_movement(offset_ary)
+    valid_moves_ary += single_movement(offset_ary)
+    if @first_move
+      valid_moves_ary << [2,rank] if queenside_castle?
+      valid_moves_ary << [6,rank] if kingside_castle?
+    end
+    return valid_moves_ary
+  end
+
+  def move(to)
+    if valid_moves.include?(to)
+      castling(to) if @first_move
+      if check_collision(to) == -1
+        capture(to)
+      end
+      move_piece(to)
+      @first_move = false
+      return true
+    end
+    return false
+  end
+
+  def castling(to)
+    return false if !valid_moves.include?(to)
+    if to == [2,rank]
+      @board.layout[[0,rank]].move([3,rank])
+      return true
+    elsif to == [6,rank]
+      @board.layout[[7,rank]].move([5,rank])
+      return true
+    else
+      return false
+    end   
+  end
+
+  def can_attack
+    valid_moves_ary = []
+    offset_ary = [[1,0],[0,1],[-1,0],[0,-1],[1,1],[-1,1],[-1,-1],[1,-1]]
+
+    valid_moves_ary += single_movement(offset_ary)
+    return valid_moves_ary
+  end
+
+  def rank
+    return 7 if @color == :black
+    return 0
+  end
+
+  def kingside_castle?
+    under_attack_ary = @board.under_attack_by(enemy)
+    has_to_be_safe = [[4,rank],[5,rank],[6,rank]]
+    rook_coords = [7, rank]
+
+    kings_first_move = @first_move = true
+    rooks_first_move = !@board.square_empty?(rook_coords) && @board.layout[rook_coords].first_move == true
+    path_empty = @board.square_empty?([6,rank]) && @board.square_empty?([5,rank])
+    safe = (has_to_be_safe - under_attack_ary == has_to_be_safe)
+    return kings_first_move && rooks_first_move && path_empty && safe
+  end
+
+  def queenside_castle?
+
+    under_attack_ary = @board.under_attack_by(enemy)
+    has_to_be_safe = [[4,rank],[3,rank],[2,rank]]
+    rook_coords = [0, rank]
+    
+    kings_first_move = @first_move = true
+    rooks_first_move = !@board.square_empty?(rook_coords) && @board.layout[rook_coords].first_move == true
+    path_empty = @board.square_empty?([3,rank]) && @board.square_empty?([2,rank]) && @board.square_empty?([1,rank])
+    safe = (has_to_be_safe - under_attack_ary == has_to_be_safe)
+    return kings_first_move && rooks_first_move && path_empty && safe
   end
 end
 
@@ -334,6 +459,7 @@ class Game
   def take_turn
     loop do
       GameRender.render_board(@board)
+      p @board.under_attack_alg_by(@player_to_go)
       break if move_piece(@player_to_go)
     end
     next_turn
@@ -366,7 +492,9 @@ class Game
   def get_input
     input = ""
     loop do
-      puts "#{@player_to_go} give me input"
+      puts "Check by white: #{@board.check_by?(:white)}"
+      puts "Check by black: #{@board.check_by?(:black)}"
+      puts "#{@player_to_go.capitalize} to go!"
       input = gets.chomp.downcase
       break if valid_input?(input)
     end
