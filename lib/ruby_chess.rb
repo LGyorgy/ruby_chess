@@ -12,8 +12,8 @@ class Board
       end
     end
 
-    @layout = Hash.new {}
-    @enpassant_target = Hash.new
+    @layout = {}
+    @enpassant_target = {}
     @captured_pieces = {white: [],
                         black: []}
 
@@ -95,8 +95,18 @@ class Board
     return false
   end
 
-  def get_cell(pos_ary)
-    @layout[pos_ary]
+  def at_coords(coords)
+    return @layout[coords]
+  end
+
+  def make_a_move(player, from, to)
+    subject = at_coords(from)
+    if subject && subject.color == player
+      if !BoardAnalyzer.move_into_check?(self, player, from, to)
+        return subject.move(to)
+      end
+    end
+    return false
   end
 end
 
@@ -426,7 +436,7 @@ class GameRender
       row_string = "#{y+1} |"
 
       8.times do |x|
-        cell = board.get_cell([x,y])
+        cell = board.at_coords([x,y])
 
         row_string << (cell != nil ? "#{cell.symbol} |" : "  |")
       end
@@ -440,9 +450,22 @@ class GameRender
   end
 end
 
+class BoardAnalyzer
+  def self.move_into_check?(board, player, from, to)
+    ghost_board = Marshal.load(Marshal.dump(board))
+    ghost_board.at_coords(from).move(to)
+    return ghost_board.check_by?(enemy(player))
+  end
+
+  def self.enemy(player)
+    player == :white ? :black : :white
+  end
+end
+
 class Game
   def initialize
     @board = Board.new
+    @ghost_board = Board.new
     @player_to_go = :white
     @turns = 1
 
@@ -459,8 +482,7 @@ class Game
   def take_turn
     loop do
       GameRender.render_board(@board)
-      p @board.under_attack_alg_by(@player_to_go)
-      break if move_piece(@player_to_go)
+      break if move_piece
     end
     next_turn
   end
@@ -471,22 +493,17 @@ class Game
     @board.reset_enpassant(@player_to_go)
   end
 
-  def move_piece(player)
+  def enemy
+    @player_to_go == :white ? :black : :white
+  end
+
+  def move_piece
     input = get_input
-    from = []
-    to = []
+    coords = input_to_coords(input)
+    from = coords[0]
+    to = coords[1]
 
-    from[0] = ("a".."h").to_a.index(input[0])
-    from[1] = input[1].to_i - 1
-
-    to[0] = ("a".."h").to_a.index(input[2])
-    to[1] = input[3].to_i - 1
-
-    subject = @board.layout[from]
-    if subject && subject.color == player
-      return true if @board.layout[from].move(to)
-    end
-    return false
+    return @board.make_a_move(@player_to_go, from, to)
   end
 
   def get_input
@@ -506,6 +523,18 @@ class Game
     return false unless ('a'..'h').include?(input[0]) && ('a'..'h').include?(input[2])
     return false unless (1..8).include?(input[1].to_i) && (1..8).include?(input[1].to_i)
     return true
+  end
+
+  def input_to_coords(input)
+    from = []
+    to = []
+
+    from[0] = ("a".."h").to_a.index(input[0])
+    from[1] = input[1].to_i - 1
+
+    to[0] = ("a".."h").to_a.index(input[2])
+    to[1] = input[3].to_i - 1
+    return [from,to]
   end
 
 end
