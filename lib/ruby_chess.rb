@@ -44,6 +44,15 @@ class Board
     create_piece(Queen, :black, [2,4])
   end
 
+  def get_pieces_by_color(color)
+    pieces_ary = []
+    @layout.each_value do |piece|
+      pieces_ary << piece if piece.color == color
+    end
+
+    return pieces_ary
+  end
+
   def create_piece(piece, color, coord)
     @layout[coord] = piece.new(self, color)
   end
@@ -460,6 +469,17 @@ class BoardAnalyzer
   def self.enemy(player)
     player == :white ? :black : :white
   end
+
+  def self.checkmate_by?(board, player)
+    board.get_pieces_by_color(enemy(player)).each do |piece|
+      piece.valid_moves.each do |move|
+        if !move_into_check?(board, enemy(player), piece.pos, move)
+          return false
+        end
+      end
+    end
+    return true
+  end
 end
 
 class Game
@@ -509,8 +529,8 @@ class Game
   def get_input
     input = ""
     loop do
-      puts "Check by white: #{@board.check_by?(:white)}"
-      puts "Check by black: #{@board.check_by?(:black)}"
+      puts "Check by white: #{@board.check_by?(:white)}, mate: #{BoardAnalyzer.checkmate_by?(@board,:white)}"
+      puts "Check by black: #{@board.check_by?(:black)}, mate: #{BoardAnalyzer.checkmate_by?(@board,:black)}"
       puts "#{@player_to_go.capitalize} to go!"
       input = gets.chomp.downcase
       break if valid_input?(input)

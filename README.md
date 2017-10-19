@@ -10,6 +10,7 @@ Current verion: v0.03
 
 ### Update history
 
+v0.11 - implement checkmate recognition
 v0.10 - implement preventing to move into check
 v0.09 - implement castling, check determination
 v0.08 - implement en passant
