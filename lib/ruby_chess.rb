@@ -1,5 +1,5 @@
 class Board
-  attr_reader :layout, :valid_coords
+  attr_reader :layout, :valid_coords, :turn
   attr_accessor :enpassant_target, :captured_pieces
 
   def initialize
@@ -12,6 +12,7 @@ class Board
       end
     end
 
+    @turn = 1
     @layout = {}
     @enpassant_target = {}
     @captured_pieces = {white: [],
@@ -26,7 +27,7 @@ class Board
     create_piece(Rook, :white, [7,0])
     create_piece(Rook, :black, [0,7])
     create_piece(Rook, :black, [7,7])
-=begin
+
     create_piece(Bishop, :white, [2,0])
     create_piece(Bishop, :white, [5,0])
     create_piece(Bishop, :black, [2,7])
@@ -36,12 +37,12 @@ class Board
     create_piece(Knight, :white, [6,0])
     create_piece(Knight, :black, [1,7])
     create_piece(Knight, :black, [6,7])
-=end
+
     create_piece(King, :white, [4,0])
     create_piece(King, :black, [4,7])
 
-    #create_piece(Queen, :white, [3,0])
-    create_piece(Queen, :black, [2,4])
+    create_piece(Queen, :white, [3,0])
+    create_piece(Queen, :black, [3,7])
   end
 
   def get_pieces_by_color(color)
@@ -300,7 +301,6 @@ class Rook < Piece
   end
 
   def valid_moves
-    cur_pos = pos
     offset_ary = [[1,0],[0,1],[-1,0],[0,-1]]
     
     return linear_movement(offset_ary)
@@ -435,7 +435,7 @@ end
 
 class GameRender
   
-  def self.render_board(board)
+  def self.render_board(board, message = "")
     hline = "  +--+--+--+--+--+--+--+--+\n"
     render_string = hline + "   A  B  C  D  E  F  G  H\n"
     
@@ -456,7 +456,9 @@ class GameRender
 
     render_string = "   A  B  C  D  E  F  G  H\n" + render_string
     print render_string
+    puts message
   end
+
 end
 
 class BoardAnalyzer
@@ -464,6 +466,10 @@ class BoardAnalyzer
     ghost_board = Marshal.load(Marshal.dump(board))
     ghost_board.at_coords(from).move(to)
     return ghost_board.check_by?(enemy(player))
+  end
+
+  def self.check_by?(board,player)
+    board.check_by?(enemy(player))
   end
 
   def self.enemy(player)
@@ -494,21 +500,32 @@ class Game
 
   def start
     loop do
-      GameRender.render_board(@board)
-      take_turn
+      break if take_turn
     end
+  end
+
+  def render_turn(msg)
+    message = message_of_this_turn + "\n" + msg
+    GameRender.render_board(@board, message)
   end
 
   def take_turn
+      render_turn("Make a move!")
     loop do
-      GameRender.render_board(@board)
       break if move_piece
+      render_turn("Illegal move! Try again!")
+    end
+    if BoardAnalyzer.checkmate_by?(@board, @player_to_go)
+      message = "Checkmate! #{@player_to_go.to_s.capitalize} wins!"
+      GameRender.render_board(@board, message)
+      return true
     end
     next_turn
+    return false
   end
 
   def next_turn
-    @turns += 1
+    @turns += 1 if @player_to_go == :black
     @player_to_go == :white ? @player_to_go = :black : @player_to_go = :white
     @board.reset_enpassant(@player_to_go)
   end
@@ -518,22 +535,47 @@ class Game
   end
 
   def move_piece
-    input = get_input
-    coords = input_to_coords(input)
-    from = coords[0]
-    to = coords[1]
+    loop do
+      input = get_input
+      coords = input_to_coords(input)
+      from = coords[0]
+      to = coords[1]
+      
+      return true if @board.make_a_move(@player_to_go, from, to)
 
-    return @board.make_a_move(@player_to_go, from, to)
+      msg = "Illegal move!"
+      subject = @board.at_coords(from)
+      if !subject
+        msg += " No piece there!"
+      elsif subject && subject.color == enemy
+        msg += " It is not your piece!"
+      elsif BoardAnalyzer.move_into_check?(@board, @player_to_go, from, to)
+        if BoardAnalyzer.check_by?(@board, enemy)
+          msg += " You must move out of check!"
+        else
+          msg += " You would move into check!"
+        end
+      end
+      msg += " Try again!"
+      render_turn(msg)
+    end
   end
+
+  def message_of_this_turn
+    message = "#{@turns}. turn: "
+    message += "Check! " if BoardAnalyzer.check_by?(@board, @player_to_go)
+    message += "#{@player_to_go.to_s.capitalize} to go!"
+    message
+  end
+
 
   def get_input
     input = ""
     loop do
-      puts "Check by white: #{@board.check_by?(:white)}, mate: #{BoardAnalyzer.checkmate_by?(@board,:white)}"
-      puts "Check by black: #{@board.check_by?(:black)}, mate: #{BoardAnalyzer.checkmate_by?(@board,:black)}"
-      puts "#{@player_to_go.capitalize} to go!"
       input = gets.chomp.downcase
+     
       break if valid_input?(input)
+      render_turn("Invalid command! Try again!")
     end
     return input
   end
@@ -556,7 +598,6 @@ class Game
     to[1] = input[3].to_i - 1
     return [from,to]
   end
-
 end
 
 Game.new
