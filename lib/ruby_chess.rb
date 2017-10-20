@@ -1,3 +1,4 @@
+require "yaml"
 class Board
   attr_reader :layout, :valid_coords, :turn
   attr_accessor :enpassant_target, :captured_pieces
@@ -489,19 +490,24 @@ class BoardAnalyzer
 end
 
 class Game
-  def initialize
+  def initialize(master)
+    @master = master
     @board = Board.new
     @ghost_board = Board.new
     @player_to_go = :white
     @turns = 1
-
-    start
+    @resumed
   end
 
   def start
     loop do
       break if take_turn
     end
+  end
+  
+  def resume
+    @resumed = true
+    start
   end
 
   def render_turn(msg)
@@ -510,7 +516,12 @@ class Game
   end
 
   def take_turn
+    if @resumed
+      render_turn ("Game loaded! Make a move!")
+      @resumed = false
+    else
       render_turn("Make a move!")
+    end
     loop do
       break if move_piece
       render_turn("Illegal move! Try again!")
@@ -568,12 +579,35 @@ class Game
     message
   end
 
+  def save(file_name)
+    Dir.mkdir("saved_games") unless File.exists?("saved_games")
+    File.open("saved_games/#{file_name}.sv", "w+") do |file|
+      file.puts YAML::dump(self)
+    end
+  end
+
+  def load(file_name)
+    @master.load(file_name)
+  end
 
   def get_input
     input = ""
     loop do
       input = gets.chomp.downcase
-     
+      if input == "save"
+        save("save1")
+        render_turn("Game Saved! Make your move!")
+        next
+      end
+      if input == "load"
+        load("save1")
+        render_turn("Game Loaded! Make your move!")
+        next
+      end
+      if input == "exit"
+        render_turn("Exiting game... Good bye!")
+        exit
+      end
       break if valid_input?(input)
       render_turn("Invalid command! Try again!")
     end
@@ -600,4 +634,23 @@ class Game
   end
 end
 
-Game.new
+class Chess
+  def initialize
+    @game = Game.new(self)
+    start
+  end
+
+  def start
+    @game.start
+  end
+
+  def load(file_name)
+    return false unless File.exists?("saved_games/#{file_name}.sv")
+    save_file = File.open("saved_games/#{file_name}.sv", "r")
+    @game = YAML::load(save_file)
+    @game.resume
+    return true
+  end
+end
+
+Chess.new

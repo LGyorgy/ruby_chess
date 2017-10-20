@@ -10,6 +10,8 @@ Current verion: v0.03
 
 ### Update history
 
+v0.13 - implement single file save system
+v0.12 - implement correct check and checkmate detection
 v0.11 - implement checkmate recognition
 v0.10 - implement preventing to move into check
 v0.09 - implement castling, check determination
