@@ -154,6 +154,16 @@ board: &2 !ruby/object:Board
       symbol: "♟"
       board: *2
       first_move: true
+    ? - 1
+      - 6
+    : !ruby/object:Pawn
+      symbol_pool:
+      - "♟"
+      - "♙"
+      color: :black
+      symbol: "♙"
+      board: *2
+      first_move: true
     ? - 2
       - 1
     : !ruby/object:Pawn
@@ -195,16 +205,6 @@ board: &2 !ruby/object:Board
       board: *2
       first_move: true
     ? - 4
-      - 1
-    : !ruby/object:Pawn
-      symbol_pool:
-      - "♟"
-      - "♙"
-      color: :white
-      symbol: "♟"
-      board: *2
-      first_move: true
-    ? - 4
       - 6
     : !ruby/object:Pawn
       symbol_pool:
@@ -224,16 +224,6 @@ board: &2 !ruby/object:Board
       symbol: "♟"
       board: *2
       first_move: true
-    ? - 5
-      - 6
-    : !ruby/object:Pawn
-      symbol_pool:
-      - "♟"
-      - "♙"
-      color: :black
-      symbol: "♙"
-      board: *2
-      first_move: true
     ? - 6
       - 1
     : !ruby/object:Pawn
@@ -242,16 +232,6 @@ board: &2 !ruby/object:Board
       - "♙"
       color: :white
       symbol: "♟"
-      board: *2
-      first_move: true
-    ? - 6
-      - 6
-    : !ruby/object:Pawn
-      symbol_pool:
-      - "♟"
-      - "♙"
-      color: :black
-      symbol: "♙"
       board: *2
       first_move: true
     ? - 7
@@ -435,7 +415,7 @@ board: &2 !ruby/object:Board
       board: *2
       first_move: true
     ? - 0
-      - 3
+      - 2
     : !ruby/object:Pawn
       symbol_pool:
       - "♟"
@@ -444,7 +424,27 @@ board: &2 !ruby/object:Board
       symbol: "♟"
       board: *2
       first_move: false
-    ? - 1
+    ? - 5
+      - 5
+    : !ruby/object:Pawn
+      symbol_pool:
+      - "♟"
+      - "♙"
+      color: :black
+      symbol: "♙"
+      board: *2
+      first_move: false
+    ? - 4
+      - 2
+    : !ruby/object:Pawn
+      symbol_pool:
+      - "♟"
+      - "♙"
+      color: :white
+      symbol: "♟"
+      board: *2
+      first_move: false
+    ? - 6
       - 4
     : &3 !ruby/object:Pawn
       symbol_pool:
@@ -457,7 +457,7 @@ board: &2 !ruby/object:Board
   enpassant_target:
     :white: []
     :black:
-    - - 1
+    - - 6
       - 5
     - *3
   captured_pieces:
@@ -921,5 +921,5 @@ ghost_board: &4 !ruby/object:Board
     :white: []
     :black: []
 player_to_go: :white
-turns: 2
+turns: 3
 resumed: false

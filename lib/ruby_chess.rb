@@ -1,4 +1,5 @@
 require "yaml"
+
 class Board
   attr_reader :layout, :valid_coords, :turn
   attr_accessor :enpassant_target, :captured_pieces
@@ -496,15 +497,15 @@ class Game
     @ghost_board = Board.new
     @player_to_go = :white
     @turns = 1
-    @resumed
+    @resumed = false
   end
 
   def start
     loop do
-      break if take_turn
+      return true if take_turn
     end
   end
-  
+
   def resume
     @resumed = true
     start
@@ -641,14 +642,33 @@ class Chess
   end
 
   def start
-    @game.start
+    loop do
+      intro
+      run_session
+    end
+  end
+
+  def run_session
+    loop do
+      if @game.start
+        puts "Press ENTER for a new game!"
+        gets
+        @game = Game.new(self)
+      end
+    end
+  end
+
+  def intro
+    puts "Ruby Chess"
+    puts "Press ENTER to start the game!"
+    gets
   end
 
   def load(file_name)
     return false unless File.exists?("saved_games/#{file_name}.sv")
     save_file = File.open("saved_games/#{file_name}.sv", "r")
     @game = YAML::load(save_file)
-    @game.resume
+    run_session
     return true
   end
 end
