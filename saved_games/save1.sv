@@ -134,16 +134,6 @@ board: &2 !ruby/object:Board
     - 7
   turn: 1
   layout:
-    ? - 0
-      - 6
-    : !ruby/object:Pawn
-      symbol_pool:
-      - "♟"
-      - "♙"
-      color: :black
-      symbol: "♙"
-      board: *2
-      first_move: true
     ? - 1
       - 1
     : !ruby/object:Pawn
@@ -205,6 +195,16 @@ board: &2 !ruby/object:Board
       board: *2
       first_move: true
     ? - 4
+      - 1
+    : !ruby/object:Pawn
+      symbol_pool:
+      - "♟"
+      - "♙"
+      color: :white
+      symbol: "♟"
+      board: *2
+      first_move: true
+    ? - 4
       - 6
     : !ruby/object:Pawn
       symbol_pool:
@@ -224,27 +224,7 @@ board: &2 !ruby/object:Board
       symbol: "♟"
       board: *2
       first_move: true
-    ? - 6
-      - 1
-    : !ruby/object:Pawn
-      symbol_pool:
-      - "♟"
-      - "♙"
-      color: :white
-      symbol: "♟"
-      board: *2
-      first_move: true
-    ? - 7
-      - 1
-    : !ruby/object:Pawn
-      symbol_pool:
-      - "♟"
-      - "♙"
-      color: :white
-      symbol: "♟"
-      board: *2
-      first_move: true
-    ? - 7
+    ? - 5
       - 6
     : !ruby/object:Pawn
       symbol_pool:
@@ -254,37 +234,47 @@ board: &2 !ruby/object:Board
       symbol: "♙"
       board: *2
       first_move: true
-    ? - 0
-      - 0
-    : !ruby/object:Rook
+    ? - 6
+      - 6
+    : !ruby/object:Pawn
       symbol_pool:
-      - "♜"
-      - "♖"
-      color: :white
-      symbol: "♜"
-      board: *2
-      first_move: true
-    ? - 7
-      - 0
-    : !ruby/object:Rook
-      symbol_pool:
-      - "♜"
-      - "♖"
-      color: :white
-      symbol: "♜"
-      board: *2
-      first_move: true
-    ? - 0
-      - 7
-    : !ruby/object:Rook
-      symbol_pool:
-      - "♜"
-      - "♖"
+      - "♟"
+      - "♙"
       color: :black
-      symbol: "♖"
+      symbol: "♙"
       board: *2
       first_move: true
     ? - 7
+      - 1
+    : !ruby/object:Pawn
+      symbol_pool:
+      - "♟"
+      - "♙"
+      color: :white
+      symbol: "♟"
+      board: *2
+      first_move: true
+    ? - 0
+      - 0
+    : !ruby/object:Rook
+      symbol_pool:
+      - "♜"
+      - "♖"
+      color: :white
+      symbol: "♜"
+      board: *2
+      first_move: true
+    ? - 7
+      - 0
+    : !ruby/object:Rook
+      symbol_pool:
+      - "♜"
+      - "♖"
+      color: :white
+      symbol: "♜"
+      board: *2
+      first_move: true
+    ? - 0
       - 7
     : !ruby/object:Rook
       symbol_pool:
@@ -295,16 +285,6 @@ board: &2 !ruby/object:Board
       board: *2
       first_move: true
     ? - 2
-      - 0
-    : !ruby/object:Bishop
-      symbol_pool:
-      - "♝"
-      - "♗"
-      color: :white
-      symbol: "♝"
-      board: *2
-      first_move: true
-    ? - 5
       - 0
     : !ruby/object:Bishop
       symbol_pool:
@@ -344,27 +324,7 @@ board: &2 !ruby/object:Board
       symbol: "♞"
       board: *2
       first_move: true
-    ? - 6
-      - 0
-    : !ruby/object:Knight
-      symbol_pool:
-      - "♞"
-      - "♘"
-      color: :white
-      symbol: "♞"
-      board: *2
-      first_move: true
     ? - 1
-      - 7
-    : !ruby/object:Knight
-      symbol_pool:
-      - "♞"
-      - "♘"
-      color: :black
-      symbol: "♘"
-      board: *2
-      first_move: true
-    ? - 6
       - 7
     : !ruby/object:Knight
       symbol_pool:
@@ -415,6 +375,16 @@ board: &2 !ruby/object:Board
       board: *2
       first_move: true
     ? - 0
+      - 4
+    : !ruby/object:Pawn
+      symbol_pool:
+      - "♟"
+      - "♙"
+      color: :black
+      symbol: "♙"
+      board: *2
+      first_move: false
+    ? - 0
       - 2
     : !ruby/object:Pawn
       symbol_pool:
@@ -426,44 +396,63 @@ board: &2 !ruby/object:Board
       first_move: false
     ? - 5
       - 5
-    : !ruby/object:Pawn
+    : !ruby/object:Knight
       symbol_pool:
-      - "♟"
-      - "♙"
+      - "♞"
+      - "♘"
       color: :black
-      symbol: "♙"
+      symbol: "♘"
       board: *2
       first_move: false
-    ? - 4
+    ? - 7
       - 2
-    : !ruby/object:Pawn
+    : !ruby/object:Knight
       symbol_pool:
-      - "♟"
-      - "♙"
+      - "♞"
+      - "♘"
       color: :white
-      symbol: "♟"
-      board: *2
-      first_move: false
-    ? - 6
-      - 4
-    : &3 !ruby/object:Pawn
-      symbol_pool:
-      - "♟"
-      - "♙"
-      color: :black
-      symbol: "♙"
+      symbol: "♞"
       board: *2
       first_move: false
   enpassant_target:
     :white: []
-    :black:
-    - - 6
-      - 5
-    - *3
-  captured_pieces:
-    :white: []
     :black: []
-ghost_board: &4 !ruby/object:Board
+  captured_pieces:
+    :white:
+    - !ruby/object:Knight
+      symbol_pool:
+      - "♞"
+      - "♘"
+      color: :white
+      symbol: "♞"
+      board: *2
+      first_move: true
+    - !ruby/object:Bishop
+      symbol_pool:
+      - "♝"
+      - "♗"
+      color: :white
+      symbol: "♝"
+      board: *2
+      first_move: false
+    :black:
+    - !ruby/object:Pawn
+      symbol_pool:
+      - "♟"
+      - "♙"
+      color: :black
+      symbol: "♙"
+      board: *2
+      first_move: false
+    - !ruby/object:Rook
+      symbol_pool:
+      - "♜"
+      - "♖"
+      color: :black
+      symbol: "♖"
+      board: *2
+      first_move: false
+ghost_board: &3 !ruby/object:Board
   dim: 8
   valid_coords:
   - - 0
@@ -604,7 +593,7 @@ ghost_board: &4 !ruby/object:Board
       - "♙"
       color: :white
       symbol: "♟"
-      board: *4
+      board: *3
       first_move: true
     ? - 0
       - 6
@@ -614,7 +603,7 @@ ghost_board: &4 !ruby/object:Board
       - "♙"
       color: :black
       symbol: "♙"
-      board: *4
+      board: *3
       first_move: true
     ? - 1
       - 1
@@ -624,7 +613,7 @@ ghost_board: &4 !ruby/object:Board
       - "♙"
       color: :white
       symbol: "♟"
-      board: *4
+      board: *3
       first_move: true
     ? - 1
       - 6
@@ -634,7 +623,7 @@ ghost_board: &4 !ruby/object:Board
       - "♙"
       color: :black
       symbol: "♙"
-      board: *4
+      board: *3
       first_move: true
     ? - 2
       - 1
@@ -644,7 +633,7 @@ ghost_board: &4 !ruby/object:Board
       - "♙"
       color: :white
       symbol: "♟"
-      board: *4
+      board: *3
       first_move: true
     ? - 2
       - 6
@@ -654,7 +643,7 @@ ghost_board: &4 !ruby/object:Board
       - "♙"
       color: :black
       symbol: "♙"
-      board: *4
+      board: *3
       first_move: true
     ? - 3
       - 1
@@ -664,7 +653,7 @@ ghost_board: &4 !ruby/object:Board
       - "♙"
       color: :white
       symbol: "♟"
-      board: *4
+      board: *3
       first_move: true
     ? - 3
       - 6
@@ -674,7 +663,7 @@ ghost_board: &4 !ruby/object:Board
       - "♙"
       color: :black
       symbol: "♙"
-      board: *4
+      board: *3
       first_move: true
     ? - 4
       - 1
@@ -684,7 +673,7 @@ ghost_board: &4 !ruby/object:Board
       - "♙"
       color: :white
       symbol: "♟"
-      board: *4
+      board: *3
       first_move: true
     ? - 4
       - 6
@@ -694,7 +683,7 @@ ghost_board: &4 !ruby/object:Board
       - "♙"
       color: :black
       symbol: "♙"
-      board: *4
+      board: *3
       first_move: true
     ? - 5
       - 1
@@ -704,7 +693,7 @@ ghost_board: &4 !ruby/object:Board
       - "♙"
       color: :white
       symbol: "♟"
-      board: *4
+      board: *3
       first_move: true
     ? - 5
       - 6
@@ -714,7 +703,7 @@ ghost_board: &4 !ruby/object:Board
       - "♙"
       color: :black
       symbol: "♙"
-      board: *4
+      board: *3
       first_move: true
     ? - 6
       - 1
@@ -724,7 +713,7 @@ ghost_board: &4 !ruby/object:Board
       - "♙"
       color: :white
       symbol: "♟"
-      board: *4
+      board: *3
       first_move: true
     ? - 6
       - 6
@@ -734,7 +723,7 @@ ghost_board: &4 !ruby/object:Board
       - "♙"
       color: :black
       symbol: "♙"
-      board: *4
+      board: *3
       first_move: true
     ? - 7
       - 1
@@ -744,7 +733,7 @@ ghost_board: &4 !ruby/object:Board
       - "♙"
       color: :white
       symbol: "♟"
-      board: *4
+      board: *3
       first_move: true
     ? - 7
       - 6
@@ -754,7 +743,7 @@ ghost_board: &4 !ruby/object:Board
       - "♙"
       color: :black
       symbol: "♙"
-      board: *4
+      board: *3
       first_move: true
     ? - 0
       - 0
@@ -764,7 +753,7 @@ ghost_board: &4 !ruby/object:Board
       - "♖"
       color: :white
       symbol: "♜"
-      board: *4
+      board: *3
       first_move: true
     ? - 7
       - 0
@@ -774,7 +763,7 @@ ghost_board: &4 !ruby/object:Board
       - "♖"
       color: :white
       symbol: "♜"
-      board: *4
+      board: *3
       first_move: true
     ? - 0
       - 7
@@ -784,7 +773,7 @@ ghost_board: &4 !ruby/object:Board
       - "♖"
       color: :black
       symbol: "♖"
-      board: *4
+      board: *3
       first_move: true
     ? - 7
       - 7
@@ -794,7 +783,7 @@ ghost_board: &4 !ruby/object:Board
       - "♖"
       color: :black
       symbol: "♖"
-      board: *4
+      board: *3
       first_move: true
     ? - 2
       - 0
@@ -804,7 +793,7 @@ ghost_board: &4 !ruby/object:Board
       - "♗"
       color: :white
       symbol: "♝"
-      board: *4
+      board: *3
       first_move: true
     ? - 5
       - 0
@@ -814,7 +803,7 @@ ghost_board: &4 !ruby/object:Board
       - "♗"
       color: :white
       symbol: "♝"
-      board: *4
+      board: *3
       first_move: true
     ? - 2
       - 7
@@ -824,7 +813,7 @@ ghost_board: &4 !ruby/object:Board
       - "♗"
       color: :black
       symbol: "♗"
-      board: *4
+      board: *3
       first_move: true
     ? - 5
       - 7
@@ -834,7 +823,7 @@ ghost_board: &4 !ruby/object:Board
       - "♗"
       color: :black
       symbol: "♗"
-      board: *4
+      board: *3
       first_move: true
     ? - 1
       - 0
@@ -844,7 +833,7 @@ ghost_board: &4 !ruby/object:Board
       - "♘"
       color: :white
       symbol: "♞"
-      board: *4
+      board: *3
       first_move: true
     ? - 6
       - 0
@@ -854,7 +843,7 @@ ghost_board: &4 !ruby/object:Board
       - "♘"
       color: :white
       symbol: "♞"
-      board: *4
+      board: *3
       first_move: true
     ? - 1
       - 7
@@ -864,7 +853,7 @@ ghost_board: &4 !ruby/object:Board
       - "♘"
       color: :black
       symbol: "♘"
-      board: *4
+      board: *3
       first_move: true
     ? - 6
       - 7
@@ -874,7 +863,7 @@ ghost_board: &4 !ruby/object:Board
       - "♘"
       color: :black
       symbol: "♘"
-      board: *4
+      board: *3
       first_move: true
     ? - 4
       - 0
@@ -884,7 +873,7 @@ ghost_board: &4 !ruby/object:Board
       - "♔"
       color: :white
       symbol: "♚"
-      board: *4
+      board: *3
       first_move: true
     ? - 4
       - 7
@@ -894,7 +883,7 @@ ghost_board: &4 !ruby/object:Board
       - "♔"
       color: :black
       symbol: "♔"
-      board: *4
+      board: *3
       first_move: true
     ? - 3
       - 0
@@ -904,7 +893,7 @@ ghost_board: &4 !ruby/object:Board
       - "♕"
       color: :white
       symbol: "♛"
-      board: *4
+      board: *3
       first_move: true
     ? - 3
       - 7
@@ -914,12 +903,12 @@ ghost_board: &4 !ruby/object:Board
       - "♕"
       color: :black
       symbol: "♕"
-      board: *4
+      board: *3
       first_move: true
   enpassant_target: {}
   captured_pieces:
     :white: []
     :black: []
-player_to_go: :white
-turns: 3
+player_to_go: :black
+turns: 8
 resumed: false

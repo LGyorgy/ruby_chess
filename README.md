@@ -10,6 +10,7 @@ Current verion: v0.03
 
 ### Update history
 
+v0.15 - implement capture info, and pawn promotion
 v0.14 - implement simple main menu
 v0.13 - implement single file save system
 v0.12 - implement correct check and checkmate detection

@@ -115,10 +115,42 @@ class Board
     subject = at_coords(from)
     if subject && subject.color == player
       if !BoardAnalyzer.move_into_check?(self, player, from, to)
-        return subject.move(to)
+        success = subject.move(to)
+        if success && subject.is_a?(Pawn)
+          puts "whaaaat"
+          promote(subject)
+        end
+        return success
       end
     end
     return false
+  end
+
+  def promote(subject)
+    promote_rank = 0
+    subject.color == :white ? promote_rank = 7 : promote_rank = 0
+    if subject.pos[1] == promote_rank
+      promote_to = promote_prompt
+      create_piece(promote_to, subject.color, subject.pos)
+    end
+  end
+
+  def promote_prompt
+    GameRender.render_board(self, "You reached the final rank with your Pawn!\nChoose a promotion!")
+    loop do
+      decision = gets.downcase.chomp
+      if decision == "queen"
+        return Queen
+      elsif decision == "rook"
+        return Rook
+      elsif decision == "knight"
+        return Knight
+      elsif decision == "bishop"
+        return Bishop
+      end
+      GameRender.render_board(self, "You can't choose that!\nChoose another promotion!")
+    end
+
   end
 end
 
@@ -164,7 +196,7 @@ class Piece
   end
 
   def capture(target)
-    @board.layout[target].get_captured
+    @board.at_coords(target).get_captured
   end
 
   def get_captured
@@ -241,6 +273,8 @@ class Pawn < Piece
     super
   end
 
+
+
   def enpassant(target)
     enpassant_target = @board.enpassant_target[enemy]
     if enpassant_target && enpassant_target[0] == target
@@ -263,7 +297,7 @@ class Pawn < Piece
 
     pos_to_check = [cur_pos[0], cur_pos[1]+(1*black_modifier)]
     if check_collision(pos_to_check) == 0
-      valid_pos << pos_to_check
+      valid_pos << pos_to_check 
     end
 
      pos_to_check = [cur_pos[0], cur_pos[1]+(2*black_modifier)]
@@ -453,6 +487,21 @@ class GameRender
       end
 
       row_string << " #{y+1}"
+      
+      if y == 7 
+        row_string << "   Captured pieces:"
+      elsif y == 6
+        row_string << "     White: "
+        board.captured_pieces[:white].each do |piece|
+          row_string << "#{piece.symbol}"
+        end
+      elsif y == 5
+        row_string << "     Black: "
+        board.captured_pieces[:black].each do |piece|
+          row_string << "#{piece.symbol}"
+        end
+      end
+
       render_string = hline + (row_string + "\n") + render_string
     end
 
@@ -562,7 +611,7 @@ class Game
       elsif subject && subject.color == enemy
         msg += " It is not your piece!"
       elsif BoardAnalyzer.move_into_check?(@board, @player_to_go, from, to)
-        if BoardAnalyzer.check_by?(@board, enemy)
+        if BoardAnalyzer.check_by?(@board, @player_to_go)
           msg += " You must move out of check!"
         else
           msg += " You would move into check!"
@@ -618,7 +667,7 @@ class Game
   def valid_input?(input)
     return false if input.length != 4
     return false unless ('a'..'h').include?(input[0]) && ('a'..'h').include?(input[2])
-    return false unless (1..8).include?(input[1].to_i) && (1..8).include?(input[1].to_i)
+    return false unless (1..8).include?(input[1].to_i) && (1..8).include?(input[3].to_i)
     return true
   end
 
