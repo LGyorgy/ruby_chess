@@ -117,7 +117,6 @@ class Board
       if !BoardAnalyzer.move_into_check?(self, player, from, to)
         success = subject.move(to)
         if success && subject.is_a?(Pawn)
-          puts "whaaaat"
           promote(subject)
         end
         return success
@@ -269,8 +268,19 @@ class Pawn < Piece
   end
   
   def move(to)
+    cur_pos = pos
     return true if enpassant(to)
-    super
+    
+    if valid_moves.include?(to)
+      if check_collision(to) == -1
+        capture(to)
+      end
+      move_piece(to)
+      @first_move = false
+      two_step(cur_pos) if to == [cur_pos[0], cur_pos[1]+(2*black_modifier)]
+      return true
+    end
+    return false
   end
 
 
@@ -291,6 +301,11 @@ class Pawn < Piece
     end
   end
 
+  def two_step(cur_pos)
+    puts "makin bacon"
+    @board.enpassant_target[@color] = [[cur_pos[0], cur_pos[1]+(1*black_modifier)], self]
+  end
+
   def valid_moves
     cur_pos = pos
     valid_pos =[]
@@ -303,7 +318,6 @@ class Pawn < Piece
      pos_to_check = [cur_pos[0], cur_pos[1]+(2*black_modifier)]
     if check_collision(pos_to_check) == 0 && @first_move
       valid_pos << pos_to_check
-      @board.enpassant_target[@color] = [[cur_pos[0], cur_pos[1]+(1*black_modifier)], self]
     end
     
      pos_to_check = [cur_pos[0]-1, cur_pos[1]+(1*black_modifier)]
@@ -630,7 +644,7 @@ class Game
   end
 
   def save(file_name)
-    Dir.mkdir("saved_games") unless File.exists?("saved_games")
+    Dir.mkdir("saved_games") unless File.exist?("saved_games")
     File.open("saved_games/#{file_name}.sv", "w+") do |file|
       file.puts YAML::dump(self)
     end
@@ -714,7 +728,7 @@ class Chess
   end
 
   def load(file_name)
-    return false unless File.exists?("saved_games/#{file_name}.sv")
+    return false unless File.exist?("saved_games/#{file_name}.sv")
     save_file = File.open("saved_games/#{file_name}.sv", "r")
     @game = YAML::load(save_file)
     run_session

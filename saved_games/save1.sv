@@ -134,7 +134,7 @@ board: &2 !ruby/object:Board
     - 7
   turn: 1
   layout:
-    ? - 1
+    ? - 0
       - 1
     : !ruby/object:Pawn
       symbol_pool:
@@ -144,7 +144,7 @@ board: &2 !ruby/object:Board
       symbol: "♟"
       board: *2
       first_move: true
-    ? - 1
+    ? - 0
       - 6
     : !ruby/object:Pawn
       symbol_pool:
@@ -152,6 +152,16 @@ board: &2 !ruby/object:Board
       - "♙"
       color: :black
       symbol: "♙"
+      board: *2
+      first_move: true
+    ? - 1
+      - 1
+    : !ruby/object:Pawn
+      symbol_pool:
+      - "♟"
+      - "♙"
+      color: :white
+      symbol: "♟"
       board: *2
       first_move: true
     ? - 2
@@ -192,16 +202,6 @@ board: &2 !ruby/object:Board
       - "♙"
       color: :black
       symbol: "♙"
-      board: *2
-      first_move: true
-    ? - 4
-      - 1
-    : !ruby/object:Pawn
-      symbol_pool:
-      - "♟"
-      - "♙"
-      color: :white
-      symbol: "♟"
       board: *2
       first_move: true
     ? - 4
@@ -235,6 +235,16 @@ board: &2 !ruby/object:Board
       board: *2
       first_move: true
     ? - 6
+      - 1
+    : !ruby/object:Pawn
+      symbol_pool:
+      - "♟"
+      - "♙"
+      color: :white
+      symbol: "♟"
+      board: *2
+      first_move: true
+    ? - 6
       - 6
     : !ruby/object:Pawn
       symbol_pool:
@@ -252,6 +262,16 @@ board: &2 !ruby/object:Board
       - "♙"
       color: :white
       symbol: "♟"
+      board: *2
+      first_move: true
+    ? - 7
+      - 6
+    : !ruby/object:Pawn
+      symbol_pool:
+      - "♟"
+      - "♙"
+      color: :black
+      symbol: "♙"
       board: *2
       first_move: true
     ? - 0
@@ -284,7 +304,27 @@ board: &2 !ruby/object:Board
       symbol: "♖"
       board: *2
       first_move: true
+    ? - 7
+      - 7
+    : !ruby/object:Rook
+      symbol_pool:
+      - "♜"
+      - "♖"
+      color: :black
+      symbol: "♖"
+      board: *2
+      first_move: true
     ? - 2
+      - 0
+    : !ruby/object:Bishop
+      symbol_pool:
+      - "♝"
+      - "♗"
+      color: :white
+      symbol: "♝"
+      board: *2
+      first_move: true
+    ? - 5
       - 0
     : !ruby/object:Bishop
       symbol_pool:
@@ -324,7 +364,27 @@ board: &2 !ruby/object:Board
       symbol: "♞"
       board: *2
       first_move: true
+    ? - 6
+      - 0
+    : !ruby/object:Knight
+      symbol_pool:
+      - "♞"
+      - "♘"
+      color: :white
+      symbol: "♞"
+      board: *2
+      first_move: true
     ? - 1
+      - 7
+    : !ruby/object:Knight
+      symbol_pool:
+      - "♞"
+      - "♘"
+      color: :black
+      symbol: "♘"
+      board: *2
+      first_move: true
+    ? - 6
       - 7
     : !ruby/object:Knight
       symbol_pool:
@@ -374,8 +434,8 @@ board: &2 !ruby/object:Board
       symbol: "♕"
       board: *2
       first_move: true
-    ? - 0
-      - 4
+    ? - 1
+      - 5
     : !ruby/object:Pawn
       symbol_pool:
       - "♟"
@@ -384,8 +444,8 @@ board: &2 !ruby/object:Board
       symbol: "♙"
       board: *2
       first_move: false
-    ? - 0
-      - 2
+    ? - 4
+      - 4
     : !ruby/object:Pawn
       symbol_pool:
       - "♟"
@@ -394,64 +454,12 @@ board: &2 !ruby/object:Board
       symbol: "♟"
       board: *2
       first_move: false
-    ? - 5
-      - 5
-    : !ruby/object:Knight
-      symbol_pool:
-      - "♞"
-      - "♘"
-      color: :black
-      symbol: "♘"
-      board: *2
-      first_move: false
-    ? - 7
-      - 2
-    : !ruby/object:Knight
-      symbol_pool:
-      - "♞"
-      - "♘"
-      color: :white
-      symbol: "♞"
-      board: *2
-      first_move: false
   enpassant_target:
+    :black: []
+    :white: []
+  captured_pieces:
     :white: []
     :black: []
-  captured_pieces:
-    :white:
-    - !ruby/object:Knight
-      symbol_pool:
-      - "♞"
-      - "♘"
-      color: :white
-      symbol: "♞"
-      board: *2
-      first_move: true
-    - !ruby/object:Bishop
-      symbol_pool:
-      - "♝"
-      - "♗"
-      color: :white
-      symbol: "♝"
-      board: *2
-      first_move: false
-    :black:
-    - !ruby/object:Pawn
-      symbol_pool:
-      - "♟"
-      - "♙"
-      color: :black
-      symbol: "♙"
-      board: *2
-      first_move: false
-    - !ruby/object:Rook
-      symbol_pool:
-      - "♜"
-      - "♖"
-      color: :black
-      symbol: "♖"
-      board: *2
-      first_move: false
 ghost_board: &3 !ruby/object:Board
   dim: 8
   valid_coords:
@@ -910,5 +918,5 @@ ghost_board: &3 !ruby/object:Board
     :white: []
     :black: []
 player_to_go: :black
-turns: 8
+turns: 2
 resumed: false

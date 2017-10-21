@@ -6,10 +6,11 @@ This is the final project for The Odin Project - Ruby Programming course.
 
 ## Change log
 
-Current verion: v0.15 
+Current verion: v0.16
 
 ### Update history
 
+v0.16 - enpassant bugfix
 v0.15 - implement capture info, and pawn promotion
 v0.14 - implement simple main menu
 v0.13 - implement single file save system
