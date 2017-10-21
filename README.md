@@ -6,7 +6,7 @@ This is the final project for The Odin Project - Ruby Programming course.
 
 ## Change log
 
-Current verion: v0.03
+Current verion: v0.15 
 
 ### Update history
 
