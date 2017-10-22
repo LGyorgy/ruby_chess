@@ -4,7 +4,8 @@ class Board
   attr_reader :layout, :valid_coords, :turn
   attr_accessor :enpassant_target, :captured_pieces
 
-  def initialize
+  def initialize(game)
+    @game = game
     @dim = 8
     @valid_coords = []
 
@@ -129,7 +130,8 @@ class Board
     promote_rank = 0
     subject.color == :white ? promote_rank = 7 : promote_rank = 0
     if subject.pos[1] == promote_rank
-      promote_to = promote_prompt
+      promote_to = promote_prompt if @game.player_to_go != @game.ai
+      promote_to = Queen if @game.player_to_go == @game.ai
       create_piece(promote_to, subject.color, subject.pos)
     end
   end
@@ -138,13 +140,13 @@ class Board
     GameRender.render_board(self, "You reached the final rank with your Pawn!\nChoose a promotion!")
     loop do
       decision = gets.downcase.chomp
-      if decision == "queen"
+      if decision == "queen" || decision == "q"
         return Queen
-      elsif decision == "rook"
+      elsif decision == "rook" || decision == "r"
         return Rook
-      elsif decision == "knight"
+      elsif decision == "knight" || decision == "k" || decision == "n"
         return Knight
-      elsif decision == "bishop"
+      elsif decision == "bishop" || decision == "b"
         return Bishop
       end
       GameRender.render_board(self, "You can't choose that!\nChoose another promotion!")
@@ -554,11 +556,13 @@ class BoardAnalyzer
 end
 
 class Game
-  def initialize(master)
+  attr_reader :player_to_go, :ai
+  def initialize(master, ai = :none)
     @master = master
-    @board = Board.new
-    @ghost_board = Board.new
+    @board = Board.new(self)
+    @ghost_board = Board.new(self)
     @player_to_go = :white
+    @ai = ai
     @turns = 1
     @resumed = false
   end
@@ -587,6 +591,7 @@ class Game
       render_turn("Make a move!")
     end
     loop do
+      break if @player_to_go == @ai && move_piece_ai
       break if move_piece
       render_turn("Illegal move! Try again!")
     end
@@ -597,6 +602,17 @@ class Game
     end
     next_turn
     return false
+  end
+
+  def move_piece_ai
+    pieces = @board.get_pieces_by_color(@player_to_go)
+    loop do
+      piece = pieces.sample
+      moves = piece.valid_moves
+      next if moves.empty?
+      move = moves.sample
+      return @board.make_a_move(@player_to_go, piece.pos, move)
+    end
   end
 
   def next_turn
@@ -705,33 +721,32 @@ class Chess
   end
 
   def start
-    loop do
       intro
-      run_session
-    end
-  end
-
-  def run_session
-    loop do
-      if @game.start
-        puts "Press ENTER for a new game!"
-        gets
-        @game = Game.new(self)
-      end
-    end
   end
 
   def intro
     puts "Ruby Chess"
-    puts "Press ENTER to start the game!"
-    gets
+    puts "Do you want to play against AI?"
+    decision = gets.downcase.chomp
+    if decision == "yes" || decision == "y"
+      puts "Who do you want to play as? (Black/White/Random)"
+      color_decision = gets.downcase.chomp
+      ai_color = :black if color_decision == "white" || color_decision == "w"
+      ai_color = :white if color_decision == "black" || color_decision == "b"
+      ai_color = [:white, :black].sample if color_decision == "random" || color_decision == "r"
+      @game = Game.new(self, ai_color)
+      @game.start
+    else
+      @game = Game.new(self)
+      @game.start
+    end
   end
 
   def load(file_name)
     return false unless File.exist?("saved_games/#{file_name}.sv")
     save_file = File.open("saved_games/#{file_name}.sv", "r")
     @game = YAML::load(save_file)
-    run_session
+    @game.start
     return true
   end
 end
